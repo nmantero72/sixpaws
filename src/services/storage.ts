@@ -273,7 +273,7 @@ export async function setDog(dog: DomainDog): Promise<void> {
       {
         id: dog.id,
         name: dog.name,
-        createdAt: getNowISO(),
+        createdAt: dog.createdAt,
       },
     ],
     selectedDogId: dog.id,
