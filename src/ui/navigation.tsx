@@ -5,11 +5,13 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import { OnboardingScreen } from "../features/onboarding/OnboardingScreen";
 import { ProfileScreen } from "../features/ProfileScreen";
+import { MapsScreen } from "../features/maps/MapsScreen";
 import { getDog } from "../services/storage";
 
 export type RootStackParamList = {
   Onboarding: undefined;
   Profile: undefined;
+  Maps: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -36,6 +38,7 @@ export function AppNavigation() {
             {() => <OnboardingScreen onComplete={setDog} />}
           </Stack.Screen>
         )}
+        <Stack.Screen name="Maps" component={MapsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
