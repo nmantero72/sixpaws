@@ -7,12 +7,14 @@ import { Pressable, Text } from "react-native";
 import { OnboardingScreen } from "../features/onboarding/OnboardingScreen";
 import { ProfileScreen } from "../features/ProfileScreen";
 import { MapsScreen } from "../features/maps/MapsScreen";
+import { WalkScreen } from "../features/walk/WalkScreen";
 import { getDog } from "../services/storage";
 
 export type RootStackParamList = {
   Onboarding: undefined;
   Profile: undefined;
   Maps: undefined;
+  Walk: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -50,6 +52,11 @@ export function AppNavigation() {
           </Stack.Screen>
         )}
         <Stack.Screen name="Maps" component={MapsScreen} options={{ title: "Mapas" }} />
+        {dog ? (
+          <Stack.Screen name="Walk" options={{ title: "Paseo" }}>
+            {({ navigation }) => <WalkScreen dog={dog} navigation={navigation} />}
+          </Stack.Screen>
+        ) : null}
       </Stack.Navigator>
     </NavigationContainer>
   );

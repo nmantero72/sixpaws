@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { View, Text, Pressable, FlatList } from "react-native";
 import type { WalkSummary, CommunitySummary } from "../../domain/types";
 import { buildMyHistory30d } from "../../domain/communityAggregator";
@@ -8,6 +10,7 @@ import {
   normalizeScores01,
 } from "../../domain/mapsEngine";
 import { getWalkSummaries, getCommunitySummary } from "../../services/storage";
+import type { RootStackParamList } from "../../ui/navigation";
 
 type Row = { cellId: string; hour: number; score: number };
 type HeaderItem = { type: "header"; key: "rec-header" | "active-header" };
@@ -17,6 +20,7 @@ type ListItem = HeaderItem | RowItem;
 const THIRTY_DAYS_MS = 30 * 24 * 3600 * 1000;
 
 export function MapsScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [hour, setHour] = useState<number>(new Date().getHours());
   const [walks, setWalks] = useState<WalkSummary[]>([]);
   const [community, setCommunity] = useState<CommunitySummary>({
@@ -119,6 +123,19 @@ export function MapsScreen() {
       <Text style={{ fontSize: 20, fontWeight: "600", marginBottom: 12 }}>
         Mapas (MVD)
       </Text>
+
+      <Pressable
+        onPress={() => navigation.navigate("Walk")}
+        style={{
+          paddingVertical: 10,
+          paddingHorizontal: 14,
+          borderWidth: 1,
+          borderRadius: 8,
+          marginBottom: 12,
+        }}
+      >
+        <Text style={{ fontWeight: "600" }}>Iniciar paseo</Text>
+      </Pressable>
 
       <View
         style={{
