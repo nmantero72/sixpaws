@@ -2,6 +2,7 @@
 import type { Dog } from "../domain/Dog";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { Pressable, Text } from "react-native";
 
 import { OnboardingScreen } from "../features/onboarding/OnboardingScreen";
 import { ProfileScreen } from "../features/ProfileScreen";
@@ -30,7 +31,17 @@ export function AppNavigation() {
     <NavigationContainer>
       <Stack.Navigator>
         {dog ? (
-          <Stack.Screen name="Profile" options={{ title: "Perfil" }}>
+          <Stack.Screen
+            name="Profile"
+            options={({ navigation }) => ({
+              title: "Perfil",
+              headerRight: () => (
+                <Pressable onPress={() => navigation.navigate("Maps")}>
+                  <Text>Mapas</Text>
+                </Pressable>
+              ),
+            })}
+          >
             {() => <ProfileScreen dog={dog} />}
           </Stack.Screen>
         ) : (
@@ -38,7 +49,7 @@ export function AppNavigation() {
             {() => <OnboardingScreen onComplete={setDog} />}
           </Stack.Screen>
         )}
-        <Stack.Screen name="Maps" component={MapsScreen} />
+        <Stack.Screen name="Maps" component={MapsScreen} options={{ title: "Mapas" }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
