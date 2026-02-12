@@ -1,4 +1,6 @@
 ﻿import React, { useMemo, useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Alert, Button, StyleSheet, Text, View } from 'react-native';
 import { buildMyHistory30d } from '../../domain/communityAggregator';
 import type { Dog } from '../../domain/Dog';
@@ -9,16 +11,21 @@ import {
   getWalkSummaries,
   setCommunitySummary,
 } from '../../services/storage';
+import type { RootStackParamList } from '../../ui/navigation';
 
 type Props = {
   dog: Dog;
+  navigation?: NativeStackNavigationProp<RootStackParamList>;
 };
 
 function createWalkId(): string {
   return `walk_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 }
 
-export function WalkScreen({ dog }: Props) {
+export function WalkScreen({ dog, navigation: navigationProp }: Props) {
+  const navigationFromHook = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation = navigationProp ?? navigationFromHook;
+
   const initialWalk = useMemo<Walk>(
     () => ({
       id: createWalkId(),
@@ -55,7 +62,29 @@ export function WalkScreen({ dog }: Props) {
       await setCommunitySummary(myCommunitySummary);
 
       setCurrentWalk(completedWalk);
-      Alert.alert('Paseo finalizado', 'Resumen guardado correctamente.');
+
+      const hour = new Date().getHours();
+      const distanceKm = (summary.distanceM / 1000).toFixed(2);
+      const durationMin = Math.round(summary.durationSec / 60);
+      const rewardMessage = [
+        `¡Gran paseo! +1 recompensa para ${dog.name}.`,
+        `Distancia: ${distanceKm} km`,
+        `Duración: ${durationMin} min`,
+        `Saludos: ${summary.greetings} · Juegos: ${summary.plays}`,
+        `Mapa actualizado para la hora ${hour}:00`,
+      ].join('\n');
+
+      Alert.alert('Paseo finalizado', rewardMessage, [
+        {
+          text: 'Volver al Perfil',
+          style: 'cancel',
+          onPress: () => navigation.navigate('Profile'),
+        },
+        {
+          text: 'Ver Mapas',
+          onPress: () => navigation.navigate('Maps'),
+        },
+      ]);
     } catch {
       Alert.alert('Error', 'No se pudo guardar el resumen del paseo.');
     } finally {
