@@ -9,7 +9,7 @@ import {
   computeHourScores,
   normalizeScores01,
 } from "../../domain/mapsEngine";
-import { getWalkSummaries, getCommunitySummary } from "../../services/storage";
+import { getWalkSummaries, getCommunitySummary, getSelectedDogId, getDogs } from "../../services/storage";
 import type { RootStackParamList } from "../../ui/navigation";
 
 type Row = { cellId: string; hour: number; score: number };
@@ -27,11 +27,19 @@ export function MapsScreen() {
     updatedAt: Date.now(),
     byCellHour: {},
   });
-
+  const [selectedDogId, setSelectedDogId] = useState<string | null>(null);
+  const [selectedDogName, setSelectedDogName] = useState<string>('Mi perro');
   useEffect(() => {
     (async () => {
       const ws = await getWalkSummaries();
       const cs = await getCommunitySummary();
+      const sd = await getSelectedDogId();
+      setSelectedDogId(sd);
+      if (sd) {
+        const dogs = await getDogs();
+        const found = dogs.find((d) => d.id === sd);
+        if (found) setSelectedDogName(found.name);
+      }
       setWalks(ws);
       setCommunity(
         cs ?? {
@@ -42,7 +50,10 @@ export function MapsScreen() {
     })();
   }, []);
 
-  const myHistory30d = useMemo(() => buildMyHistory30d(walks, Date.now()), [walks]);
+  const myHistory30d = useMemo(() => {
+    const filtered = selectedDogId ? walks.filter((w) => w.dogId === selectedDogId) : walks;
+    return buildMyHistory30d(filtered, Date.now());
+  }, [walks, selectedDogId]);
 
   const walksIn30dCount = useMemo(() => {
     const now = Date.now();
@@ -123,9 +134,18 @@ export function MapsScreen() {
       <Text style={{ fontSize: 20, fontWeight: "600", marginBottom: 12 }}>
         Mapas (MVD)
       </Text>
+      <Text style={{ marginBottom: 12, opacity: 0.7 }}>
+        Perro activo: {selectedDogName}
+      </Text>
 
       <Pressable
-        onPress={() => navigation.navigate("Walk")}
+        onPress={() => {
+          if (selectedDogId) {
+            navigation.navigate("Walk", { dogId: selectedDogId });
+          } else {
+            navigation.navigate("Profile");
+          }
+        }}
         style={{
           paddingVertical: 10,
           paddingHorizontal: 14,
