@@ -88,6 +88,7 @@ export type CellId = string; // "g50:..:.."
 
 export type WalkSummary = {
   walkId: UUID;
+  dogId: UUID;
 
   startedAt: number;   // epoch ms
   endedAt: number;     // epoch ms

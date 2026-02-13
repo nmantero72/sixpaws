@@ -1,5 +1,5 @@
-﻿import React, { useMemo, useState } from 'react';
-import { useNavigation } from '@react-navigation/native';
+﻿import React, { useMemo, useState, useEffect } from 'react';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Alert, Button, StyleSheet, Text, View } from 'react-native';
 import { buildMyHistory30d } from '../../domain/communityAggregator';
@@ -10,31 +10,41 @@ import {
   appendWalkSummary,
   getWalkSummaries,
   setCommunitySummary,
+  getDogs,
 } from '../../services/storage';
 import type { RootStackParamList } from '../../ui/navigation';
 
-type Props = {
-  dog: Dog;
-  navigation?: NativeStackNavigationProp<RootStackParamList>;
-};
+
 
 function createWalkId(): string {
   return `walk_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 }
 
-export function WalkScreen({ dog, navigation: navigationProp }: Props) {
-  const navigationFromHook = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const navigation = navigationProp ?? navigationFromHook;
+export function WalkScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const route = useRoute();
+  const { dogId } = (route.params ?? {}) as RootStackParamList['Walk'];
+  const [dogName, setDogName] = useState<string>('Mi perro');
+  useEffect(() => {
+    (async () => {
+      if (!dogId) return;
 
+      const dogs = await getDogs();
+      const found = dogs.find((d) => d.id === dogId);
+      if (found) {
+        setDogName(found.name);
+      }
+    })();
+  }, [dogId]);
   const initialWalk = useMemo<Walk>(
     () => ({
       id: createWalkId(),
-      dogId: dog.id,
+      dogId,
       startedAt: Date.now(),
       points: [],
       encounters: [],
     }),
-    [dog.id],
+    [dogId],
   );
 
   const [currentWalk, setCurrentWalk] = useState<Walk>(initialWalk);
@@ -67,7 +77,7 @@ export function WalkScreen({ dog, navigation: navigationProp }: Props) {
       const distanceKm = (summary.distanceM / 1000).toFixed(2);
       const durationMin = Math.round(summary.durationSec / 60);
       const rewardMessage = [
-        `¡Gran paseo! +1 recompensa para ${dog.name}.`,
+        `¡Gran paseo! +1 recompensa para ${dogName}.`,
         `Distancia: ${distanceKm} km`,
         `Duración: ${durationMin} min`,
         `Saludos: ${summary.greetings} · Juegos: ${summary.plays}`,
@@ -95,7 +105,7 @@ export function WalkScreen({ dog, navigation: navigationProp }: Props) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Paseo</Text>
-      <Text style={styles.subtitle}>Perro: {dog.name}</Text>
+      <Text style={styles.subtitle}>Perro: {dogName}</Text>
 
       <View style={styles.card}>
         <Text>Tiempo: --</Text>
