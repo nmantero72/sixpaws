@@ -14,7 +14,7 @@ export type RootStackParamList = {
   Onboarding: undefined;
   Profile: undefined;
   Maps: undefined;
-  Walk: undefined;
+  Walk: { dogId: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -52,11 +52,7 @@ export function AppNavigation() {
           </Stack.Screen>
         )}
         <Stack.Screen name="Maps" component={MapsScreen} options={{ title: "Mapas" }} />
-        {dog ? (
-          <Stack.Screen name="Walk" options={{ title: "Paseo" }}>
-            {({ navigation }) => <WalkScreen dog={dog} navigation={navigation} />}
-          </Stack.Screen>
-        ) : null}
+        <Stack.Screen name="Walk" component={WalkScreen} options={{ title: "Paseo" }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

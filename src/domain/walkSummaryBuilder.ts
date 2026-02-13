@@ -117,6 +117,7 @@ export function buildWalkSummary(walk: Walk): WalkSummary {
 
   return {
     walkId: walk.id,
+    dogId: walk.dogId,
     startedAt: walk.startedAt,
     endedAt: walk.endedAt,
     durationSec: Math.round((walk.endedAt - walk.startedAt) / 1000),
